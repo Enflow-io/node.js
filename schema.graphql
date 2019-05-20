@@ -1,0 +1,51 @@
+scalar JSON
+scalar DateTime
+
+type Query {
+    poll(id: ID!): Poll,
+    getUser: Result
+}
+
+
+type Result {
+    data: JSON
+}
+
+type Mutation {
+    createPoll(answers:[AnswerInput], color_scheme:String, title:String, finishTime:DateTime): Poll
+    updatePoll(pollID:Int,answers:[AnswerInput], color_scheme:String, title:String, finishTime:DateTime): Poll,
+    createVote(pollID: Int!, answerID: Int!): Vote
+}
+
+type Vote {
+    id: Int,
+    userID: Int,
+    pollID: Int,
+    answerID: Int,
+    poll: Poll
+}
+
+type Poll {
+    id: Int,
+    answers: [Answer]
+    color_scheme: String
+    title: String,
+    finishTime: DateTime
+    percentage: JSON,
+    votes_counter: Int,
+    voted: JSON
+
+
+}
+
+
+
+type Answer {
+    id: Int,
+    title: String
+}
+
+input AnswerInput {
+    id: Int!,
+    title: String!
+}

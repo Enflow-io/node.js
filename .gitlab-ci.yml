@@ -1,0 +1,30 @@
+image: docker:stable
+
+stages:
+  - Build image
+  - testapp
+  - push
+
+docker build:
+  stage: Build image
+  script:
+  - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+  
+testapp:
+  stage: testapp
+  script:
+  - docker network create --driver bridge testnet || echo "Net already created"
+  - docker rm --force postgresfortest || echo "Not found postgresfortest"
+  - docker run --rm --network testnet --name postgresfortest --rm -d -e POSTGRES_USER=docker_test -e POSTGRES_PASSWORD=NahWe3Chuthuaw -e POSTGRES_DB=mir_tesen_test library/postgres
+  - sleep 5
+  - docker run --network testnet $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA npm run test
+  - docker stop postgresfortest
+
+pushcontainer:
+  stage: push
+  script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN gitlab.smi2.net:5001
+  - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA 
+  - docker push $CI_REGISTRY_IMAGE:latest 
+  
+  
